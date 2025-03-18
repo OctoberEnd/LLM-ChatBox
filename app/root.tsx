@@ -6,6 +6,7 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
+import { ThemeProvider } from "next-themes";
 
 import "./tailwind.css";
 import { Toaster } from "./components/ui/sonner";
@@ -22,7 +23,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {children}
+        </ThemeProvider>
+
         <Toaster richColors position="top-center" duration={2000} />
         <ScrollRestoration />
         <Scripts />

@@ -5,6 +5,7 @@ import {
   ChatBubbleLeftIcon,
 } from "@heroicons/react/24/outline";
 import { Button } from "../ui/button";
+import { ThemeToggle } from "../ui/ThemeToggle";
 import { cn } from "~/lib/utils";
 
 export default function Sidebar() {
@@ -64,6 +65,10 @@ export default function Sidebar() {
       {/* 底部功能区 */}
       <div className="p-4 border-t border-border space-y-2">
         {/* 导出按钮 */}
+        <div className="flex items-center gap-2">
+          <p className="text-sm text-muted-foreground">切换主题</p>
+          <ThemeToggle />
+        </div>
         <Button variant="outline" className="w-full text-sm" size="sm">
           导出会话记录
         </Button>

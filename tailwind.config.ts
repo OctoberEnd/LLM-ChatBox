@@ -1,8 +1,11 @@
 import type { Config } from "tailwindcss";
 
 export default {
+  // 使用系统颜色模式
   darkMode: ["class"],
+  // 内容路径
   content: ["./app/**/{**,.client,.server}/**/*.{js,jsx,ts,tsx}"],
+  // 主题配置
   theme: {
     extend: {
       borderRadius: {

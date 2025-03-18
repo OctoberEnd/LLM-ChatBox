@@ -1,26 +1,23 @@
 import { useChatStore } from "~/store";
 import { useEffect, useRef, useState } from "react";
 import { ChatContentType, MessageInter } from "~/types";
-import Markdown from "~/components/markdown";
-import FileCard from "~/components/chat/FileCard";
-import { CheckIcon, ClipboardDocumentIcon } from "@heroicons/react/24/outline";
-import pkg from "react-copy-to-clipboard";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
-import { MdSkeleton, SuggestionSkeleton } from "~/components/chat/ChatSkeleton";
-const { CopyToClipboard } = pkg;
+import { AIMessage } from "./AIMessage";
+import { UserMessage } from "./UserMessage";
 
+// 聊天内容组件
 export default function ChatContent({ type }: ChatContentType) {
+  // 聊天存储，获取消息数据
   const store = useChatStore();
+  // 消息，管理本地的 messages 状态
   const [messages, setMessages] = useState<MessageInter[]>([]);
+  // 滚动条
   const scrollRef = useRef<HTMLDivElement>(null);
+  // 定时器
   const timer = useRef<NodeJS.Timeout | null>(null);
+  // 复制状态
   const [copied, setCopied] = useState(false);
+  // 使用聊天存储，从store获取消息数据
   useEffect(() => {
     if (type === "inline") {
       setMessages(store.messages_inline);
@@ -28,18 +25,25 @@ export default function ChatContent({ type }: ChatContentType) {
       setMessages(store.messages);
     }
   }, [store, type]);
-
+  // 滚动条
   useEffect(() => {
+    // 计算滚动条距离底部的高度
     const distance =
       window.innerHeight - (scrollRef.current?.scrollHeight || 0) - 100;
+    // 如果定时器存在或滚动条距离底部的高度大于0，则不执行
     if (timer.current || distance > 0) return;
+    // 设置定时器，800ms后执行
     timer.current = setTimeout(() => {
+      // 滚动到底部
       ScrollToBottom();
+      // 清除定时器
       clearTimeout(timer.current as NodeJS.Timeout);
+      // 定时器置空
       timer.current = null;
     }, 800);
   }, [messages]);
 
+  //  messages 更新时自动滚动到底部
   const ScrollToBottom = () => {
     if (scrollRef.current) {
       scrollRef.current.scrollTo({
@@ -48,12 +52,13 @@ export default function ChatContent({ type }: ChatContentType) {
       });
     }
   };
+  // 复制状态
   useEffect(() => {
     if (copied) {
       setTimeout(() => setCopied(false), 1000);
     }
   }, [copied]);
-
+  // 发送消息
   const sendMessage = (v: string) => {
     if (type === "inline") {
       store.setSendMessageFlagInline(v);
@@ -61,7 +66,9 @@ export default function ChatContent({ type }: ChatContentType) {
       store.setSendMessageFlag(v);
     }
   };
+  // 返回聊天内容组件
   return (
+    // 滚动条
     <div
       ref={scrollRef}
       className={cn(
@@ -70,103 +77,16 @@ export default function ChatContent({ type }: ChatContentType) {
         type === "inline" && "h-[400px]"
       )}
     >
+      {/* 遍历 messages 数组，渲染每条消息 */}
       {messages.map((item, index) => (
         <div className="mb-6" key={index}>
+          {/* 根据消息的 role 属性决定显示样式 */}
           {item.role === "assistant" && (
-            <div className="flex items-start space-x-4">
-              <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <span className="text-primary text-sm font-medium">AI</span>
-              </div>
-
-              <div className="flex-1 space-y-2">
-                {!item.error ? (
-                  item.text ? (
-                    <div className="group">
-                      <div className="bg-muted/50 rounded-2xl p-4">
-                        <Markdown>{item.text}</Markdown>
-                      </div>
-                      <div className="mt-1 hidden group-hover:flex justify-end">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <CopyToClipboard
-                                text={item.text}
-                                onCopy={() => setCopied(true)}
-                              >
-                                <button className="p-1.5 rounded-md hover:bg-muted transition-colors">
-                                  {copied ? (
-                                    <CheckIcon className="w-4 h-4 text-green-500" />
-                                  ) : (
-                                    <ClipboardDocumentIcon className="w-4 h-4 text-muted-foreground" />
-                                  )}
-                                </button>
-                              </CopyToClipboard>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>复制内容</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
-                    </div>
-                  ) : (
-                    <MdSkeleton />
-                  )
-                ) : (
-                  <div className="text-red-500 bg-red-50 dark:bg-red-900/10 rounded-xl p-4">
-                    {item.error}
-                  </div>
-                )}
-
-                {index === messages.length - 1 && item.suggestions && (
-                  <div className="mt-3 space-y-2">
-                    {item.suggestions.length > 0 ? (
-                      item.suggestions.map((suggestion, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => sendMessage(suggestion)}
-                          className="w-full text-left p-2.5 rounded-lg text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
-                        >
-                          {suggestion}
-                        </button>
-                      ))
-                    ) : (
-                      <SuggestionSkeleton />
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
+            <AIMessage key={index} message={item} onSendMessage={sendMessage} />
           )}
 
-          {item.role === "user" && (
-            <div className="flex items-start space-x-4 flex-row-reverse">
-              <div className="w-9 h-9 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
-                <span className="text-secondary text-sm font-medium">You</span>
-              </div>
-
-              <div className="flex-1 space-y-3">
-                {item.images?.map((img, idx) => (
-                  <img
-                    key={idx}
-                    src={img.base64}
-                    alt={img.name}
-                    className="w-32 h-32 object-cover rounded-xl border border-border/50"
-                  />
-                ))}
-
-                {item.files?.map((file, idx) => (
-                  <FileCard key={idx} file={file} />
-                ))}
-
-                <div className="bg-primary text-primary-foreground rounded-2xl p-4 max-w-[80%] ml-auto">
-                  <pre className="whitespace-pre-wrap break-words text-sm">
-                    {item.text}
-                  </pre>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* 用户消息 */}
+          {item.role === "user" && <UserMessage key={index} message={item} />}
         </div>
       ))}
     </div>

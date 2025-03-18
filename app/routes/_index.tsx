@@ -21,6 +21,7 @@ export const meta: MetaFunction = () => {
 // 首页 授权
 export default function Index() {
   useEffect(() => {
+    // 应用主题模式——自动模式（跟随系统）
     applyThemeMode(ThemeMode.Auto);
     const code = new URLSearchParams(window.location.search).get("code");
     const init = async () => {

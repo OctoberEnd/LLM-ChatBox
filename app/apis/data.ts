@@ -2,6 +2,8 @@ import { MessageApiInter, ResponseRetrieveInter } from "~/types";
 import { getBotId, getToken, getCustomProxyUrl } from "~/utils/oauth";
 import { getStorageSetting, updateTwoToken } from "~/utils/storage";
 
+// 实现了与后端 API 的交互，主要涉及聊天、文件上传、轮询、消息详情获取、OAuth 授权和令牌管理等功能
+
 // 代理地址
 export const cn_proxy_url = "https://api.coze.cn";
 export const ncn_proxy_url = "https://api.coze.com";
@@ -10,7 +12,7 @@ export const ncn_proxy_url = "https://api.coze.com";
 // pro
 const redirect_uri = "http://175.178.3.60:3000/";
 
-// 聊天
+// 发送聊天消息到后端
 export const asyncChat = async (
   messages: MessageApiInter[],
   abort: AbortController

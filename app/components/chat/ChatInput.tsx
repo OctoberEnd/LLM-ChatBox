@@ -35,34 +35,47 @@ import {
 import ImageCard from "./ImageCard";
 import { getStorageSetting, updateTwoToken } from "~/utils/storage";
 
+// 聊天输入组件
 export default function ChatInput({ type }: ChatContentType) {
+  // 输入框内容
   const [prompt, setPrompt] = useState("");
+  // 输入框引用
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  // 是否正在发送
   const [isLoading, setIsLoading] = useState(false);
+  // 文件列表
   const [files, setFiles] = useState<FileInfoInter[]>([]);
+  // 图片列表
   const [images, setImages] = useState<FileInfoInter[]>([]);
+  // 消息列表
   const [messages, setMessages] = useState<MessageApiInter[]>([]);
+  // 取消控制器
   const [abort_controller, setAbortController] = useState<AbortController>();
+  // 聊天存储
   const store = useChatStore();
 
+  // 输入框聚焦
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
   }, []);
 
+  // 发送消息
   useEffect(() => {
     if (store.sendMessageFlag && type === "page")
       sendMessage(store.sendMessageFlag);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store.sendMessageFlag]);
 
+  // 发送消息
   useEffect(() => {
     if (store.sendMessageFlagInline && type === "inline")
       sendMessage(store.sendMessageFlagInline);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store.sendMessageFlagInline]);
 
+  // 构建消息内容
   const buildContent = (
     text: string,
     fileList: FileInfoInter[],
